@@ -6,21 +6,12 @@ app = Flask(__name__)
 def recommend():
     data = request.get_json()
     destination = data.get("destination")
-    margin_score = float(data.get("margin"))
+    margin = float(data.get("margin", 0))
 
-    # Exemple de recommandations fictives
-    recommendations = [
-        {
-            "hotel": "Hôtel Premium " + destination,
-            "price": 250,
-            "margin": margin_score + 0.1,
-            "bonus": "petit-déjeuner inclus"
-        },
-        {
-            "hotel": "Hôtel Éco " + destination,
-            "price": 180,
-            "margin": margin_score + 0.05,
-            "bonus": "annulation gratuite"
-        }
+    # Simuler recommandations
+    hotels = [
+        {"hotel": f"Hôtel Premium {destination}", "price": 250, "margin": margin + 0.1},
+        {"hotel": f"Hôtel Zen {destination}", "price": 210, "margin": margin + 0.05}
     ]
-    return jsonify(recommendations)
+
+    return jsonify(hotels)
