@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import random
 from datetime import datetime, timedelta
 
-app = Flask(_name_)  # ✅ correction ici
+app = Flask(__name__)
 
 room_types = ["Standard", "Deluxe", "Suite", "Family", "Economy"]
 hotel_types = ["Resort", "Boutique", "Business", "Luxury", "Budget", "Wellness"]
@@ -18,57 +18,49 @@ def random_date(base_date_str, variation_days=3):
 def recommend():
     data = request.get_json()
 
-    base_checkin = data.get("CheckInDate", "2025-08-10")
-    base_checkout = data.get("CheckOutDate", "2025-08-15")
-    base_city = data.get("Destination", "Paris")
-    base_price = float(data.get("Price", 100))
-    base_stars = int(data.get("HotelStars", 4))
-    base_room_type = data.get("RoomType", "Standard")
-    base_refundable = int(data.get("Refundable", 1))
-    base_breakfast = int(data.get("BreakfastIncluded", 1))
-    base_parking = int(data.get("ParkingAvailable", 0))
-    base_activities = int(data.get("ActivitiesIncluded", 0))  # ✅ clé corrigée
-    base_guests = int(data.get("NumberOfGuest", 2))
+    # Suppression des valeurs par défaut : on suppose que tout est envoyé depuis UiPath ✅
+    destination = data["Destination"]
+    checkin_base = data["CheckInDate"]
+    checkout_base = data["CheckOutDate"]
+    price = float(data["Price"])
+    margin = float(data["MarginScore"])
+    stars = int(data["HotelStars"])
+    room_type = data["RoomType"]
+    refundable = data["Refundable"]
+    breakfast = data["BreakfastIncluded"]
+    parking = data["ParkingAvailable"]
+    activities = data["ActivitiesIcluded"]
+    guests = data["NumberOfGuest"]
+    booking_channel = data["BookingChannel"]
 
-    booking_channel = data.get("BookingChannel", "Online")
-    if "agency" in booking_channel.lower():
-        hotel_type = "Business"
-    elif "direct" in booking_channel.lower():
-        hotel_type = "Boutique"
-    else:
-        hotel_type = random.choice(hotel_types)
+    hotel_type = "Business" if "agency" in booking_channel.lower() else random.choice(hotel_types)
 
-    results = []
-    for _ in range(random.randint(5, 20)):
-        checkin = random_date(base_checkin)
-        checkout = random_date(base_checkout)
-        if checkin > checkout:
-            checkin, checkout = checkout, checkin
+    checkin = random_date(checkin_base)
+    checkout = random_date(checkout_base)
+    if checkin > checkout:
+        checkin, checkout = checkout, checkin
 
-        result = {
-            "Hotel Type": hotel_type,
-            "Room Type": random.choice(room_types),
-            "Check-In Date": checkin,
-            "Check-Out Date": checkout,
-            "Check-In Time": random.choice(checkin_times),
-            "Check-Out Time": random.choice(checkout_times),
-            "Price": round(base_price + random.uniform(-30, 30), 2),
-            "City": base_city,
-            "Stars": min(max(base_stars + random.choice([-1, 0, 1]), 2), 5),
-            "Airport Transfer": random.randint(0, 1),
-            "Refundable": base_refundable,
-            "BreakfastIncluded": base_breakfast,
-            "ParkingAvailable": base_parking,
-            "ActivitiesIncluded": base_activities,
-            "NumberOfGuest": base_guests,
-            "Reservation URL": f"https://www.book-now.com/reservation/{random.randint(100000,999999)}"
-        }
-        results.append(result)
+    result = {
+        "Hotel Type": hotel_type,
+        "Hotel Name": f"Hôtel {random.choice(['Premium', 'Zen', 'Relax', 'Élite'])} {destination}",
+        "Room Type": room_type,
+        "Check-In Date": checkin,
+        "Check-Out Date": checkout,
+        "Check-In Time": random.choice(checkin_times),
+        "Check-Out Time": random.choice(checkout_times),
+        "Price": round(price + random.uniform(-30, 30), 2),
+        "City": destination,
+        "Stars": min(max(stars + random.choice([-1, 0, 1]), 2), 5),
+        "Airport Transfer": random.randint(0, 1),
+        "Refundable": refundable,
+        "BreakfastIncluded": breakfast,
+        "ParkingAvailable": parking,
+        "ActivitiesIncluded": activities,
+        "NumberOfGuest": guests,
+        "Reservation URL": f"https://www.book-now.com/reservation/{random.randint(100000,999999)}"
+    }
 
-    return jsonify({
-        "status": "success",
-        "results": results
-    })
+    return jsonify(result)
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     app.run(debug=True)
