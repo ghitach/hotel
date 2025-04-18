@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import random
 from datetime import datetime, timedelta
 
-app = Flask(__name__)
+app = Flask(_name_)  # ✅ correction ici
 
 room_types = ["Standard", "Deluxe", "Suite", "Family", "Economy"]
 hotel_types = ["Resort", "Boutique", "Business", "Luxury", "Budget", "Wellness"]
@@ -27,10 +27,9 @@ def recommend():
     base_refundable = int(data.get("Refundable", 1))
     base_breakfast = int(data.get("BreakfastIncluded", 1))
     base_parking = int(data.get("ParkingAvailable", 0))
-    base_activities = int(data.get("ActivitiesIcluded", 0))
+    base_activities = int(data.get("ActivitiesIncluded", 0))  # ✅ clé corrigée
     base_guests = int(data.get("NumberOfGuest", 2))
 
-    # booking channel influence hotel type ?
     booking_channel = data.get("BookingChannel", "Online")
     if "agency" in booking_channel.lower():
         hotel_type = "Business"
@@ -66,4 +65,10 @@ def recommend():
         }
         results.append(result)
 
-    return jsonify(results)
+    return jsonify({
+        "status": "success",
+        "results": results
+    })
+
+if _name_ == "_main_":
+    app.run(debug=True)
